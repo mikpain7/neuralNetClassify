@@ -28,6 +28,7 @@ images.seek(16)  # first pixel of first image (1 byte)
 #Setup neural net (28*28 = 784)
 ImageList = []
 LabelList = []
+ImageListNormalized = []
 
 #Print results
 while numberOfImagesToRead > 0:
@@ -38,14 +39,25 @@ while numberOfImagesToRead > 0:
     ImageList.append(currentImage)
     LabelList.append(currentLabel)
 
-for image in ImageList:
-    printImage(image)
+    currentList = []
+    for char in currentImage:
+        currentList.append(char.__int__()/255)
+    ImageListNormalized.append(currentList)
+    print(currentList)
+    print(ImageListNormalized)
+print(currentList)
+#Init Neural Net.
+net = neuralNet.Net()
+net.setInputLayer(currentList)   # start with first image for dimensions.
+net.addHiddenLayer()
+net.addOutputLayer(10)          # one for each digit.. also want to add an extra for garbled/unable to determine.
 
-#Make neuron class.
-#Instance some neurons, with 784 incoming connections.
-#For each image apply it to the neural net's inputs and find an answer.
-# adjust the network slightly to make it more accurate.
-# repeat
+print("MArker")
+
+for image in ImageListNormalized:
+    printImage(image)
+    net.setInputLayer(image)
+    net.calcNet()
 
 
 
