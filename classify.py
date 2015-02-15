@@ -1,6 +1,8 @@
 # Implements a NeuralNet to Classify images of handwritten numbers.
 # Michael Riley Feb 2015 -
 
+import neuralNet
+
 def printImage(currentImageToPrint):
     charsPerLine = 28       # Use to configure the numbers of chars output per line.
     charactersPrinted = 0
@@ -14,7 +16,7 @@ def printImage(currentImageToPrint):
             charactersPrinted = 0
             print("")
 
-numberOfImagesToRead = 3  # how many images to load. (max 60000 b/c there are only that many in the file.)
+numberOfImagesToRead = 1  # how many images to load. (max 60000 b/c there are only that many in the file.)
 
 labels = open("data/train-labels.idx1-ubyte", 'rb')
 images = open("data/train-images.idx3-ubyte", 'rb')
