@@ -2,6 +2,7 @@
 # Michael Riley Feb 2015 -
 
 import neuralNet
+import pickle
 
 def printImage(currentImageToPrint):
     charsPerLine = 28       # Use to configure the numbers of chars output per line.
@@ -15,6 +16,31 @@ def printImage(currentImageToPrint):
         if charactersPrinted == 28:
             charactersPrinted = 0
             print("")
+
+def initNeuralNetwork(filename=None):
+    if filename==None: # start from scratch....
+        #Init Neural Net.
+        net = neuralNet.Net()
+        net.addInputLayer(currentList)   # start with first image for dimensions.
+        net.addHiddenLayer()
+        net.addOutputLayer(10)          # one for each digit.. also want to add an extra for garbled/unable to determine.
+        net.randomizeNet()
+        return net
+    else:
+        file = open(filename, 'rb')
+        net = pickle.load(file)
+        file.close()
+
+def saveNeuralNetwork(net, filename=None):
+    if filename==None:
+        raise RuntimeError('Can\'t open file without filename.')
+    else:
+        file = open(filename, 'wb')
+        pickle.dump(net, file, -1)
+        file.close()
+
+
+
 
 numberOfImagesToRead = 1  # how many images to load. (max 60000 b/c there are only that many in the file.)
 
@@ -43,24 +69,16 @@ while numberOfImagesToRead > 0:
     for char in currentImage:
         currentList.append(char.__int__()/255)
     ImageListNormalized.append(currentList)
-    print(currentList)
-    print(ImageListNormalized)
-print(currentList)
-#Init Neural Net.
-net = neuralNet.Net()
-net.setInputLayer(currentList)   # start with first image for dimensions.
-net.addHiddenLayer()
-net.addOutputLayer(10)          # one for each digit.. also want to add an extra for garbled/unable to determine.
 
-print("MArker")
+net = initNeuralNetwork('network1')
 
 for image in ImageListNormalized:
     printImage(image)
     net.setInputLayer(image)
     net.calcNet()
+    net.displayOutputWeights()
 
-
-
+saveNeuralNetwork(net, 'network1')
 # Close files and notify console we are finished.
 labels.close()
 images.close()

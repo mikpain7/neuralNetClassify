@@ -10,6 +10,7 @@ class Neuron(object):
     def __init__(self):
         self.affectors = {}                      # contains a link to a neuron and an associated weight.
         self.value = -1                          # default out-of bounds value.
+        self.threshold = 1
 
     def addAffector(self, n, weight = None):
         if weight == None:
@@ -29,9 +30,16 @@ class Neuron(object):
         self.value = 0                            # this is the accumulator
         for i in self.affectors.keys():
             self.value += i.value * self.affectors[i]      # add the wieights together.
+        self.value = self.value / self.threshold
+        #print (self.value, self.threshold) # for debug
+        if self.value > 0.9:
+            self.value = 0.9
+        if self.value < 0.1:
+            self.value = 0.1
 
     def randomize(self):                #Randomizes current value and weights associated with each source neuron.
         self.value = random.random()                            # randomize value.. if wieghts are to be used without first calling calcValue
+        self.threshold = random.randint(10, 884)                 # not sure what to start these on..
         for i in self.affectors.keys():                         # for every link...
             self.affectors[i] = random.random()                 # assign a value between 0 and 1
 
@@ -63,8 +71,8 @@ class Layer(object):
         if len(valueList) != len(self.neuronList):
             raise RuntimeError('Expected Length:', len(self.neuronList), " recieved length:", len(valueList)  )
         else:
-            for n in self.neuronList:
-                n.setValue(valueList.pop(0))
+            for i in range(0, len(self.neuronList)):
+                self.neuronList[i].setValue(valueList[i])
 
     def randomizeLayer(self):
         for n in self.neuronList:
@@ -81,8 +89,11 @@ class Net(object):
         self.hiddenLayers = []
         self.hiddenLayerCount = 0
 
-    def setInputLayer(self, listOfValues):
+    def addInputLayer(self, listOfValues):
         self.inputLayer.initNeurons(len(listOfValues))
+        self.inputLayer.setValues(listOfValues)
+
+    def setInputLayer(self, listOfValues):
         self.inputLayer.setValues(listOfValues)
 
     def addHiddenLayer(self):
@@ -111,6 +122,10 @@ class Net(object):
         for layer in self.hiddenLayers:
             layer.calcLayer()
         self.outputLayer.calcLayer()
+
+    def displayOutputWeights(self):
+        for i in range(0, len(self.outputLayer.neuronList)):
+            print(i," has weight: " ,self.outputLayer.neuronList[i].value)
 
     def displayNet(self):
 
