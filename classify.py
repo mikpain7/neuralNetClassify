@@ -2,7 +2,6 @@
 # Michael Riley Feb 2015 -
 
 import neuralNet
-import pickle
 
 def printImage(currentImageToPrint):
     charsPerLine = 28       # Use to configure the numbers of chars output per line.
@@ -23,12 +22,14 @@ def initNeuralNetwork(filename=None):
         net = neuralNet.Net()
         net.addInputLayer(currentList)   # start with first image for dimensions.
         net.addHiddenLayer()
+        net.addHiddenLayer()
+
         net.addOutputLayer(10)          # one for each digit.. also want to add an extra for garbled/unable to determine.
         net.randomizeNet()
         return net
     else:
         file = open(filename, 'rb')
-        net = pickle.load(file)
+        #net = pickle.load(file)
         file.close()
 
 def saveNeuralNetwork(net, filename=None):
@@ -36,13 +37,11 @@ def saveNeuralNetwork(net, filename=None):
         raise RuntimeError('Can\'t open file without filename.')
     else:
         file = open(filename, 'wb')
-        pickle.dump(net, file, -1)
+       # pickle.dump(net, file, -1)
         file.close()
 
 
-
-
-numberOfImagesToRead = 1  # how many images to load. (max 60000 b/c there are only that many in the file.)
+numberOfImagesToRead = 1000  # how many images to load. (max 60000 b/c there are only that many in the file.)
 
 labels = open("data/train-labels.idx1-ubyte", 'rb')
 images = open("data/train-images.idx3-ubyte", 'rb')
@@ -71,14 +70,27 @@ while numberOfImagesToRead > 0:
     ImageListNormalized.append(currentList)
 
 net = initNeuralNetwork('network1')
+net = initNeuralNetwork()
 
-for image in ImageListNormalized:
-    printImage(image)
-    net.setInputLayer(image)
+numberCorrectSoFar = 0
+
+for i in range(0, len(ImageListNormalized)):
+    print("Image number:", i+1, " it should be identified as a:", LabelList[i])
+    #printImage(ImageListNormalized[i])
+    net.setInputLayer(ImageListNormalized[i])
     net.calcNet()
-    net.displayOutputWeights()
+    net.calcGradientsNet(neuralNet.makeTargetVector(LabelList[i]))
 
-saveNeuralNetwork(net, 'network1')
+    net.applyCalculatedGradientsToNet()
+    net.displayBestGuess()
+    if net.returnBestGuess() == LabelList[i]:
+        numberCorrectSoFar += 1
+    print("Correct: " + str(numberCorrectSoFar) + "  Percentage: " + str(numberCorrectSoFar/(i+1)))
+
+    print("----------------------------------------------------------------")
+    #net.displayOutputWeights()
+
+saveNeuralNetwork(net, 'network1')      # this is currently not working.
 # Close files and notify console we are finished.
 labels.close()
 images.close()
